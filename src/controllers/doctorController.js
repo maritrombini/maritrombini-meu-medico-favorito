@@ -22,7 +22,11 @@ const getAllDoctors = async (req, res) => {
   const favorite = req.query.favorite
   try {
     const where = favorite ? { where: { favorite } } : {}
-    const doctors = await Doctor.findAll(where)
+    const doctors = await Doctor.findAll({
+      where,
+      order: [['id', 'ASC']] // para o inverso trocar ASC por DESC
+    })
+
     if (doctors && doctors.length > 0) {
       res.status(200).send(doctors)
     } else {
@@ -38,7 +42,51 @@ const getAllDoctors = async (req, res) => {
 // res.status(500).send({ message: error.message })
 // }
 
+const getDoctor = async (req, res) => {
+  const doctorId = req.params.id
+  try {
+    const doctor = await Doctor.findOne({
+      where: { id: doctorId }
+    })
+    if (doctor) {
+      res.status(200).send(doctor)
+    } else {
+      res.status(404).send({
+        message: `Médico de Id ${doctorId} não foi localizado na Base de dados.`
+      })
+    }
+  } catch (error) {
+    res.status(500).send({ message: error.message })
+  }
+}
+
+const updateDoctor = async (req, res) => {
+  const doctorId = req.params.id
+  const { name, crm, specialty, clinic, phone, favorite } = req.body
+  try {
+    const rowsUpdated = await Doctor.update(
+      { name, crm, specialty, clinic, phone, favorite },
+      { where: { id: doctorId } }
+    )
+    if (rowsUpdated && rowsUpdated[0] > 0) {
+      res
+        .status(200)
+        .send({ message: `Médico com o Id ${doctorId} alterado com sucesso` })
+    } else {
+      res
+        .status(404)
+        .send({
+          message: `Médico com o Id ${doctorId} não foi localizado para alteração.`
+        })
+    }
+  } catch (error) {
+    res.status(500).send({ message: error.message })
+  }
+}
+
 module.exports = {
   createDoctor,
-  getAllDoctors
+  getAllDoctors,
+  getDoctor,
+  updateDoctor
 }
