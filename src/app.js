@@ -1,27 +1,21 @@
 const express = require('express')
 const app = express()
 
-//ROUTES
-const index = require('./routes/index')
 const doctors = require('./routes/doctors')
+const index = require('./routes/index')
 
 app.use(express.json())
-
-//require('./models/Doctor.js')
 
 app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*')
   res.header(
     'Access-Control-Allow-Headers',
-    'Origin, X-Request-Width, Content-Type, Accept'
+    'Origin, X-Requested-With, Content-Type, Accept'
   )
-
   next()
 })
 
-app.use('/', index)
-app.use('/doctors', doctors)
-
+// para que o front consiga utilizar as rotas que vamos criar precisamos dar essa permissão de acesso
 app.options('/*', (req, res) => {
   res.header('Access-Control-Allow-Origin', '*')
   res.header('Access-Control-Allow-Headers')
@@ -32,4 +26,8 @@ app.options('/*', (req, res) => {
   res.send('send some thing whatever')
 })
 
-module.exports = { app }
+app.use('/', index)
+
+app.use('/doctors', doctors)
+
+module.exports = app
